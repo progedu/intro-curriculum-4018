@@ -53,6 +53,8 @@ describe('/schedules', () => {
     passportStub.uninstall(app);
   });
 
+  memo = 'aaa\r\nbbb'
+
   it('予定が作成でき、表示される', (done) => {
     User.upsert({ userId: 0, username: 'testuser' }).then(() => {
       request(app)
@@ -64,7 +66,9 @@ describe('/schedules', () => {
           let createdSchedulePath = res.headers.location;
           request(app)
             .get(createdSchedulePath)
-            // TODO 作成された予定と候補が表示されていることをテストする
+            .expect(/テスト予定1/)
+            .expect(/テストメモ2/)
+            .expect(/テスト候補3/)
             .expect(200)
             .end((err, res) => {
               // テストで作成したデータを削除
