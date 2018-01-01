@@ -65,6 +65,29 @@ describe('/schedules', () => {
           request(app)
             .get(createdSchedulePath)
             // TODO 作成された予定と候補が表示されていることをテストする
+            //回答プロセス↓
+            /* 最初に考えた回答：エラー
+            .expect(/テスト予定1/)
+            .expect(/テストメモ1\r\nテストメモ2/)
+            .expect(/テスト候補1\r\nテスト候補2\r\nテスト候補3/)
+            */
+            /*　２番目に作った回答：正解
+            .expect(/テスト予定1/)
+            .expect(/テストメモ1/)
+            .expect(/テストメモ1/)
+            .expect(/テスト候補1/)
+            .expect(/テスト候補2/)
+            .expect(/テスト候補3/)
+            */
+            //　色々調べた結果のパターン：正解
+            // candidatesに関する処理がmemoと異なるため、このような結果になったと思う。
+            // 具体的にいうとroutes/schedules.jsの24行目あたり
+            .expect(/テスト予定1/)
+            .expect(/テストメモ1\r\nテストメモ2/)
+            .expect(/テスト候補1/)
+            .expect(/テスト候補2/)
+            .expect(/テスト候補3/)
+            
             .expect(200)
             .end((err, res) => {
               // テストで作成したデータを削除
