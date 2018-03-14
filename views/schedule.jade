@@ -1,18 +1,27 @@
+//- layout.jadeを継承し
 extends layout
-
+//- contentブロックを書き換える
 block content
+  //- スケジュール名
   h4 #{schedule.scheduleName}
+  //- ソース中の連続する半角スペース・タブ・改行を、そのまま表示する。
   p(style="white-space:pre;") #{schedule.memo}
+  //- φ(..)メモメモ
+  p #{schedule.memo}
+  //- 作成者名
   p 作成者: #{schedule.user.username}
   h3 出欠表
   table
     tr
       th 予定
+      //- 存在するユーザーをすべて表示する
       each user in users
         th #{user.username}
     each candidate in candidates
       tr
+        //- 候補日を表示し
         th #{candidate.candidateName}
+        //- すべてのユーザーごとに出欠ボタンを表示する
         each user in users
           td
             button 欠席
