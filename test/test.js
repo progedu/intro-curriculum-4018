@@ -9,7 +9,9 @@ let Candidate = require('../models/candidate');
 describe('/login', () => {
   before(() => {
     passportStub.install(app);
-    passportStub.login({ username: 'testuser' });
+    passportStub.login({
+      username: 'testuser'
+    });
   });
 
   after(() => {
@@ -45,7 +47,10 @@ describe('/logout', () => {
 describe('/schedules', () => {
   before(() => {
     passportStub.install(app);
-    passportStub.login({ id: 0, username: 'testuser' });
+    passportStub.login({
+      id: 0,
+      username: 'testuser'
+    });
   });
 
   after(() => {
@@ -54,26 +59,44 @@ describe('/schedules', () => {
   });
 
   it('予定が作成でき、表示される', (done) => {
-    User.upsert({ userId: 0, username: 'testuser' }).then(() => {
+    User.upsert({
+      userId: 0,
+      username: 'testuser'
+    }).then(() => {
       request(app)
         .post('/schedules')
-        .send({ scheduleName: 'テスト予定1', memo: 'テストメモ1\r\nテストメモ2', candidates: 'テスト候補1\r\nテスト候補2\r\nテスト候補3' })
+        .send({
+          scheduleName: 'テスト予定1',
+          memo: 'テストメモ1\r\nテストメモ2',
+          candidates: 'テスト候補1\r\nテスト候補2\r\nテスト候補3'
+        })
         .expect('Location', /schedules/)
         .expect(302)
         .end((err, res) => {
           let createdSchedulePath = res.headers.location;
           request(app)
             .get(createdSchedulePath)
-            // TODO 作成された予定と候補が表示されていることをテストする
+            .expect(/テスト予定1/)
+            .expect(/テストメモ1/)
+            .expect(/テストメモ2/)
+            .expect(/テスト候補1/)
+            .expect(/テスト候補2/)
+            .expect(/テスト候補3/)
             .expect(200)
             .end((err, res) => {
               // テストで作成したデータを削除
               let scheduleId = createdSchedulePath.split('/schedules/')[1];
               Candidate.findAll({
-                where: { scheduleId: scheduleId }
+                where: {
+                  scheduleId: scheduleId
+                }
               }).then((candidates) => {
-                candidates.forEach((c) => { c.destroy(); });
-                Schedule.findById(scheduleId).then((s) => { s.destroy(); });
+                candidates.forEach((c) => {
+                  c.destroy();
+                });
+                Schedule.findById(scheduleId).then((s) => {
+                  s.destroy();
+                });
               });
               if (err) return done(err);
               done();
