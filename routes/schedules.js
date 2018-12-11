@@ -22,6 +22,7 @@ router.post('/', authenticationEnsurer, (req, res, next) => {
     updatedAt: updatedAt
   }).then((schedule) => {
     const candidateNames = req.body.candidates.trim().split('\n').map((s) => s.trim()).filter((s) => s !== "");
+    console.log(candidateNames);
     const candidates = candidateNames.map((c) => {
       return {
         candidateName: c,
