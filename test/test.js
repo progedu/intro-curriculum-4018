@@ -61,7 +61,7 @@ describe('/schedules', () => {
         .expect('Location', /schedules/)
         .expect(302)
         .end((err, res) => {
-          let createdSchedulePath = res.headers.location;
+          const createdSchedulePath = res.headers.location;
           request(app)
             .get(createdSchedulePath)
             // TODO 作成された予定と候補が表示されていることをテストする
@@ -75,11 +75,9 @@ describe('/schedules', () => {
               }).then((candidates) => {
                 const promises = candidates.map((c) => { return c.destroy(); });
                 Promise.all(promises).then(() => {
-                  Schedule.findByPk(scheduleId).then((s) => { 
-                    s.destroy().then(() => { 
-                      done(); 
-                    });
-                  });
+                  Schedule.findByPk(scheduleId).then((s) => { s.destroy(); });
+                  if (err) return done(err);
+                  done();
                 });
               });
             });
