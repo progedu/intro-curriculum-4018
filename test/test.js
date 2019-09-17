@@ -54,8 +54,10 @@ describe('/schedules', () => {
   });
 
   it('予定が作成でき、表示される', (done) => {
+    // userId が 0　で username が、testuser のユーザーをデータベース上に作成
     User.upsert({ userId: 0, username: 'testuser' }).then(() => {
       request(app)
+        // POST メソッドを使い予定と候補を作成
         .post('/schedules')
         .send({ scheduleName: 'テスト予定1', memo: 'テストメモ1\r\nテストメモ2', candidates: 'テスト候補1\r\nテスト候補2\r\nテスト候補3' })
         .expect('Location', /schedules/)
@@ -64,7 +66,14 @@ describe('/schedules', () => {
           let createdSchedulePath = res.headers.location;
           request(app)
             .get(createdSchedulePath)
-            // TODO 作成された予定と候補が表示されていることをテストする
+            // .expect(/文字列/) で正規表現を書くことで、レスポンスに含まれる文字列がある場合は
+            // テストを成功させ、含まれない場合はテストを失敗させるように実装することができる。
+            .expect(/テスト予定1/)
+            .expect(/テストメモ1/)
+            .expect(/テストメモ2/)
+            .expect(/テスト候補1/)
+            .expect(/テスト候補2/)
+            .expect(/テスト候補3/)
             .expect(200)
             .end((err, res) => {
               if (err) return done(err);
@@ -74,7 +83,11 @@ describe('/schedules', () => {
                 where: { scheduleId: scheduleId }
               }).then((candidates) => {
                 const promises = candidates.map((c) => { return c.destroy(); });
+                // Promise.all 関数は、配列で渡された全ての Promise が終了した際に結果を返す、
+                // Promise　オブジェクトを作成する。
+                // Promise オブジェクトの結果は、then 関数に関数を渡して利用できる。
                 Promise.all(promises).then(() => {
+                  // findByPk 関数は、モデルに対応するデータを主キーによって一行だけ取得できる。
                   Schedule.findByPk(scheduleId).then((s) => { 
                     s.destroy().then(() => { 
                       if (err) return done(err);
