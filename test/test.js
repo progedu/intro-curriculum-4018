@@ -64,7 +64,12 @@ describe('/schedules', () => {
           let createdSchedulePath = res.headers.location;
           request(app)
             .get(createdSchedulePath)
-            // TODO 作成された予定と候補が表示されていることをテストする
+            .expect(/テス卜予定1/)
+            .expect(/テス卜メモ1/)
+            .expect(/テス卜メモ2/)
+            .expect(/テス卜候補1/)
+            .expect(/テス卜候補2/)
+            .expect(/テス卜候補3/)
             .expect(200)
             .end((err, res) => {
               if (err) return done(err);
