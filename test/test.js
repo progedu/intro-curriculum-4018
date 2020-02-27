@@ -66,6 +66,9 @@ describe('/schedules', () => {
             .get(createdSchedulePath)
             // TODO 作成された予定と候補が表示されていることをテストする
             .expect(/テスト予定1/)
+            .expect(/テスト候補1/)
+            .expect(/テスト候補2/)
+            .expect(/テスト候補3/)
             .expect(200)
             .end((err, res) => {
               if (err) return done(err);
@@ -89,6 +92,7 @@ describe('/schedules', () => {
     });
   });
 
+// 以下のテストは不要（１つのitで、複数の文字列を検証可能）
   it('予定が作成でき、表示される', (done) => {
     User.upsert({ userId: 0, username: 'testuser' }).then(() => {
       request(app)
