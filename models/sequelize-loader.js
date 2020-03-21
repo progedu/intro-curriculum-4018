@@ -3,7 +3,8 @@ const Sequelize = require('sequelize');
 const sequelize = new Sequelize(
   'postgres://postgres:postgres@localhost/schedule_arranger',
   {
-    operatorsAliases: false
+    operatorsAliases: false,
+    logging: false  // yarn test の時にログが表示されなくなるので見やすくなる
   });
 
 module.exports = {
