@@ -1,10 +1,7 @@
 'use strict';
-let request = require('supertest');
-let app = require('../app');
-let passportStub = require('passport-stub');
-let User = require('../models/user');
-let Schedule = require('../models/schedule');
-let Candidate = require('../models/candidate');
+const request = require('supertest');
+const app = require('../app');
+const passportStub = require('passport-stub');
 
 describe('/login', () => {
   before(() => {
@@ -33,15 +30,6 @@ describe('/login', () => {
   });
 });
 
-describe('/logout', () => {
-  it('/ にリダイレクトされる', (done) => {
-    request(app)
-      .get('/logout')
-      .expect('Location', '/')
-      .expect(302, done);
-  });
-});
-
 describe('/schedules', () => {
   before(() => {
     passportStub.install(app);
@@ -61,10 +49,15 @@ describe('/schedules', () => {
         .expect('Location', /schedules/)
         .expect(302)
         .end((err, res) => {
-          let createdSchedulePath = res.headers.location;
+          const createdSchedulePath = res.headers.location;
           request(app)
             .get(createdSchedulePath)
-            // TODO 作成された予定と候補が表示されていることをテストする
+            .expect(/テスト予定1/)
+            .expect(/テストメモ1/)
+            .expect(/テストメモ2/)
+            .expect(/テスト候補1/)
+            .expect(/テスト候補2/)
+            .expect(/テスト候補3/)
             .expect(200)
             .end((err, res) => {
               if (err) return done(err);
@@ -88,4 +81,13 @@ describe('/schedules', () => {
     });
   });
 
+});
+
+describe('/logout', () => {
+  it('/ にリダイレクトされる', (done) => {
+    request(app)
+      .get('/logout')
+      .expect('Location', '/')
+      .expect(302, done);
+  });
 });
