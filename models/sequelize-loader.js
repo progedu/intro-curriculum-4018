@@ -1,12 +1,14 @@
-'use strict';
-const Sequelize = require('sequelize');
+"use strict";
+const Sequelize = require("sequelize");
 const sequelize = new Sequelize(
-  'postgres://postgres:postgres@localhost/schedule_arranger',
+  "postgres://postgres:postgres@localhost/schedule_arranger",
   {
-    operatorsAliases: false
-  });
+    operatorsAliases: false,
+    logging: false,
+  }
+);
 
 module.exports = {
   database: sequelize,
-  Sequelize: Sequelize
+  Sequelize: Sequelize,
 };
