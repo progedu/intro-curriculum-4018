@@ -19,13 +19,17 @@ router.post('/', authenticationEnsurer, (req, res, next) => {
     scheduleName: req.body.scheduleName.slice(0, 255) || '（名称未設定）',
     memo: req.body.memo,
     createdBy: req.user.id,
-    updatedAt: updatedAt
+    updatedAt: updatedAt,
   }).then((schedule) => {
-    const candidateNames = req.body.candidates.trim().split('\n').map((s) => s.trim()).filter((s) => s !== "");
+    const candidateNames = req.body.candidates
+      .trim()
+      .split('\n')
+      .map((s) => s.trim())
+      .filter((s) => s !== '');
     const candidates = candidateNames.map((c) => {
       return {
         candidateName: c,
-        scheduleId: schedule.scheduleId
+        scheduleId: schedule.scheduleId,
       };
     });
     Candidate.bulkCreate(candidates).then(() => {
@@ -39,23 +43,23 @@ router.get('/:scheduleId', authenticationEnsurer, (req, res, next) => {
     include: [
       {
         model: User,
-        attributes: ['userId', 'username']
-      }],
+        attributes: ['userId', 'username'],
+      },
+    ],
     where: {
-      scheduleId: req.params.scheduleId
+      scheduleId: req.params.scheduleId,
     },
-    order: [['updatedAt', 'DESC']]
   }).then((schedule) => {
     if (schedule) {
       Candidate.findAll({
         where: { scheduleId: schedule.scheduleId },
-        order: [['candidateId', 'ASC']]
+        order: [['candidateId', 'ASC']],
       }).then((candidates) => {
         res.render('schedule', {
           user: req.user,
           schedule: schedule,
           candidates: candidates,
-          users: [req.user]
+          users: [req.user],
         });
       });
     } else {
