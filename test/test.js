@@ -1,70 +1,80 @@
 'use strict';
-let request = require('supertest');
-let app = require('../app');
-let passportStub = require('passport-stub');
-let User = require('../models/user');
-let Schedule = require('../models/schedule');
-let Candidate = require('../models/candidate');
+const request = require('supertest');
+const app = require('../app');
+const passportStub = require('passport-stub');
+const User = require('../models/user');
+const Schedule = require('../models/schedule');
+const Candidate = require('../models/candidate');
 
 describe('/login', () => {
-  before(() => {
+  beforeAll(() => {
     passportStub.install(app);
     passportStub.login({ username: 'testuser' });
   });
 
-  after(() => {
+  afterAll(() => {
     passportStub.logout();
     passportStub.uninstall(app);
   });
 
-  it('ログインのためのリンクが含まれる', (done) => {
-    request(app)
+  test('ログインのためのリンクが含まれる', () => {
+    return request(app)
       .get('/login')
       .expect('Content-Type', 'text/html; charset=utf-8')
       .expect(/<a href="\/auth\/github"/)
-      .expect(200, done);
+      .expect(200);
   });
 
-  it('ログイン時はユーザー名が表示される', (done) => {
-    request(app)
+  test('ログイン時はユーザー名が表示される', () => {
+    return request(app)
       .get('/login')
       .expect(/testuser/)
-      .expect(200, done);
+      .expect(200);
   });
 });
 
 describe('/logout', () => {
-  it('/ にリダイレクトされる', (done) => {
-    request(app)
+  test('/ にリダイレクトされる', () => {
+    return request(app)
       .get('/logout')
       .expect('Location', '/')
-      .expect(302, done);
+      .expect(302);
   });
 });
 
 describe('/schedules', () => {
-  before(() => {
+  beforeAll(() => {
     passportStub.install(app);
     passportStub.login({ id: 0, username: 'testuser' });
   });
 
-  after(() => {
+  afterAll(() => {
     passportStub.logout();
     passportStub.uninstall(app);
   });
 
-  it('予定が作成でき、表示される', (done) => {
+  test('予定が作成でき、表示される', (done) => {
     User.upsert({ userId: 0, username: 'testuser' }).then(() => {
       request(app)
         .post('/schedules')
-        .send({ scheduleName: 'テスト予定1', memo: 'テストメモ1\r\nテストメモ2', candidates: 'テスト候補1\r\nテスト候補2\r\nテスト候補3' })
+        .send({ 
+          scheduleName: 'テスト予定1',
+          memo: 'テストメモ1\r\nテストメモ2',
+          candidates: 'テスト候補1\r\nテスト候補2\r\nテスト候補3'
+        })
         .expect('Location', /schedules/)
         .expect(302)
         .end((err, res) => {
-          let createdSchedulePath = res.headers.location;
+          const createdSchedulePath = res.headers.location;
           request(app)
             .get(createdSchedulePath)
-            // TODO 作成された予定と候補が表示されていることをテストする
+            .expect(/testuser/)
+            .expect(/テスト予定1/)
+            .expect(/テストメモ1/)
+            .expect(/テストメモ2/)
+            .expect(/テスト候補1/)
+            .expect(/テスト候補2/)
+            .expect(/テスト候補3/)
             .expect(200)
             .end((err, res) => {
               if (err) return done(err);
