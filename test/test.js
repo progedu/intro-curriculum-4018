@@ -35,10 +35,7 @@ describe('/login', () => {
 
 describe('/logout', () => {
   it('/ にリダイレクトされる', (done) => {
-    request(app)
-      .get('/logout')
-      .expect('Location', '/')
-      .expect(302, done);
+    request(app).get('/logout').expect('Location', '/').expect(302, done);
   });
 });
 
@@ -57,7 +54,11 @@ describe('/schedules', () => {
     User.upsert({ userId: 0, username: 'testuser' }).then(() => {
       request(app)
         .post('/schedules')
-        .send({ scheduleName: 'テスト予定1', memo: 'テストメモ1\r\nテストメモ2', candidates: 'テスト候補1\r\nテスト候補2\r\nテスト候補3' })
+        .send({
+          scheduleName: 'テスト予定1',
+          memo: 'テストメモ1\r\nテストメモ2',
+          candidates: 'テスト候補1\r\nテスト候補2\r\nテスト候補3',
+        })
         .expect('Location', /schedules/)
         .expect(302)
         .end((err, res) => {
@@ -65,20 +66,28 @@ describe('/schedules', () => {
           request(app)
             .get(createdSchedulePath)
             // TODO 作成された予定と候補が表示されていることをテストする
+            .expect(/テスト予定1/)
+            .expect(/テストメモ1/)
+            .expect(/テストメモ2/)
+            .expect(/テスト候補1/)
+            .expect(/テスト候補2/)
+            .expect(/テスト候補3/)
             .expect(200)
             .end((err, res) => {
               if (err) return done(err);
               // テストで作成したデータを削除
               const scheduleId = createdSchedulePath.split('/schedules/')[1];
               Candidate.findAll({
-                where: { scheduleId: scheduleId }
+                where: { scheduleId: scheduleId },
               }).then((candidates) => {
-                const promises = candidates.map((c) => { return c.destroy(); });
+                const promises = candidates.map((c) => {
+                  return c.destroy();
+                });
                 Promise.all(promises).then(() => {
-                  Schedule.findByPk(scheduleId).then((s) => { 
-                    s.destroy().then(() => { 
+                  Schedule.findByPk(scheduleId).then((s) => {
+                    s.destroy().then(() => {
                       if (err) return done(err);
-                      done(); 
+                      done();
                     });
                   });
                 });
@@ -87,5 +96,4 @@ describe('/schedules', () => {
         });
     });
   });
-
 });
