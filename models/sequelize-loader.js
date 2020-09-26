@@ -3,7 +3,8 @@ const Sequelize = require('sequelize');
 const sequelize = new Sequelize(
   'postgres://postgres:postgres@localhost/schedule_arranger',
   {
-    operatorsAliases: false
+    operatorsAliases: false,
+    logging: false//テスト時ログが出なくなる。見やすい。
   });
 
 module.exports = {

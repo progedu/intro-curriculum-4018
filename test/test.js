@@ -53,6 +53,11 @@ describe('/schedules', () => {
     passportStub.uninstall(app);
   });
 
+//userId が 0 で username が、testuserの ユーザーをデータベース上に作成
+//その後、 POST メソッドを使い予定と候補を作成
+//そこからリダイレクトされることを検証し、予定が表示されるページヘの アクセスが 200 のステータスコードであることを検証。
+//テストが終わった後に、テストで作成されたユーザー以外の データを削除する処理を追加。
+
   it('予定が作成でき、表示される', (done) => {
     User.upsert({ userId: 0, username: 'testuser' }).then(() => {
       request(app)
@@ -65,6 +70,12 @@ describe('/schedules', () => {
           request(app)
             .get(createdSchedulePath)
             // TODO 作成された予定と候補が表示されていることをテストする
+            .expect(/テスト予定1/)
+            .expect(/テストメモ1/)
+            .expect(/テストメモ2/)
+            .expect(/テスト候補1/)
+            .expect(/テスト候補2/)
+            .expect(/テスト候補3/)
             .expect(200)
             .end((err, res) => {
               if (err) return done(err);
