@@ -1,12 +1,22 @@
 'use strict';
-let request = require('supertest');
-let app = require('../app');
-let passportStub = require('passport-stub');
+let request = require('supertest');    // サーバーを起動することなく、ログインの確認ができる
+let app = require('../app');    // テストしたいコードが含まれるモジュールのインポート
+let passportStub = require('passport-stub');    // github認証を通すことなく、github認証周りのテスト環境がセットできるモジュール
 let User = require('../models/user');
 let Schedule = require('../models/schedule');
 let Candidate = require('../models/candidate');
 
+/* 復習：Jest の記法
+ 　 describe('テストしたい内容', () => {
+     test('テスト内容を文字列で入力', () => {
+         return supertest(app).
+                  get()
+     })
+ })
+*/
+// testuser でログインして、ログアウトできるか確認
 describe('/login', () => {
+  // github 認証が通るかテスト
   beforeAll(() => {
     passportStub.install(app);
     passportStub.login({ username: 'testuser' });
@@ -16,6 +26,8 @@ describe('/login', () => {
     passportStub.logout();
     passportStub.uninstall(app);
   });
+
+  // ログインの確認
   test('ログインのためのリンクが含まれる', () => {
     return request(app)
       .get('/login')
@@ -41,6 +53,7 @@ describe('/logout', () => {
   });
 });
 
+// データベース schedule のテスト
 describe('/schedules', () => {
   beforeAll(() => {
     passportStub.install(app);
@@ -61,13 +74,19 @@ describe('/schedules', () => {
           memo: 'テストメモ1\r\nテストメモ2',
           candidates: 'テスト候補1\r\nテスト候補2\r\nテスト候補3'
         })
-        .expect('Location', /schedules/)
-        .expect(302)
+        .expect('Location', /schedules/)    // リダイレクト先のURLに /schedules/ が含まれているか
+        .expect(302)    // リダイレクト
         .end((err, res) => {
           const createdSchedulePath = res.headers.location;
           request(app)
             .get(createdSchedulePath)
             // TODO 作成された予定と候補が表示されていることをテストする
+            .expect(/テスト予定1/)
+            .expect(/テストメモ1/)
+            .expect(/テストメモ2/)
+            .expect(/テスト候補1/)
+            .expect(/テスト候補2/)
+            .expect(/テスト候補3/)
             .expect(200)
             .end((err, res) => {
               if (err) return done(err);
