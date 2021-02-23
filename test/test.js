@@ -67,7 +67,11 @@ describe('/schedules', () => {
           const createdSchedulePath = res.headers.location;
           request(app)
             .get(createdSchedulePath)
-            // TODO 作成された予定と候補が表示されていることをテストする
+            .expect(/<h4>テスト予定1<\/h4>/)
+            .expect(/<p style="white-space:pre;">テストメモ1\r\nテストメモ2<\/p>/)
+            .expect(/<th>テスト候補1<\/th>/)
+            .expect(/<th>テスト候補2<\/th>/)
+            .expect(/<th>テスト候補3<\/th>/)
             .expect(200)
             .end((err, res) => {
               if (err) return done(err);
