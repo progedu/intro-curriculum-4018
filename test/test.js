@@ -64,9 +64,12 @@ describe("/schedules", () => {
           const createdSchedulePath = res.headers.location;
           request(app)
             .get(createdSchedulePath)
-            .expect(/テスト予定/)
-            .expect(/テストメモ/)
-            .expect(/テスト候補/)
+            .expect(/テスト予定1/)
+            .expect(/テストメモ1/)
+            .expect(/テストメモ2/)
+            .expect(/テスト候補1/)
+            .expect(/テスト候補2/)
+            .expect(/テスト候補3/)
             .expect(200)
             .end((err, res) => {
               if (err) return done(err);
