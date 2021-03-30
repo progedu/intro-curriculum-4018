@@ -16,6 +16,7 @@ describe('/login', () => {
     passportStub.logout();
     passportStub.uninstall(app);
   });
+
   test('ログインのためのリンクが含まれる', () => {
     return request(app)
       .get('/login')

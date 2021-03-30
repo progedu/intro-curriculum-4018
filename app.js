@@ -59,6 +59,9 @@ var loginRouter = require('./routes/login');
 var logoutRouter = require('./routes/logout');
 var schedulesRouter = require('./routes/schedules');
 
+//3 更新 availabilities.jsより
+var availabilitiesRouter = require('./routes/availabilities');
+
 var app = express();
 app.use(helmet());
 
@@ -80,6 +83,9 @@ app.use('/', indexRouter);
 app.use('/login', loginRouter);
 app.use('/logout', logoutRouter);
 app.use('/schedules', schedulesRouter);
+
+
+
 
 app.get('/auth/github',
   passport.authenticate('github', { scope: ['user:email'] }),
