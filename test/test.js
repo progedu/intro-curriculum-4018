@@ -16,6 +16,7 @@ describe('/login', () => {
     passportStub.logout();
     passportStub.uninstall(app);
   });
+
   test('ログインのためのリンクが含まれる', () => {
     return request(app)
       .get('/login')
@@ -41,6 +42,8 @@ describe('/logout', () => {
   });
 });
 
+//以下テストコード
+
 describe('/schedules', () => {
   beforeAll(() => {
     passportStub.install(app);
@@ -55,6 +58,7 @@ describe('/schedules', () => {
   test('予定が作成でき、表示される', done => {
     User.upsert({ userId: 0, username: 'testuser' }).then(() => {
       request(app)
+      // POST メソッドを使い予定と候補を作成しています
         .post('/schedules')
         .send({
           scheduleName: 'テスト予定1',
@@ -68,10 +72,20 @@ describe('/schedules', () => {
           request(app)
             .get(createdSchedulePath)
             // TODO 作成された予定と候補が表示されていることをテストする
+            //追加
+            //その文字列が含まれるか expect
+            .expect(/テスト予定1/)
+            .expect(/テストメモ1/)
+            .expect(/テストメモ2/)
+            .expect(/テスト候補1/)
+            .expect(/テスト候補2/)
+            .expect(/テスト候補3/)
+            //
             .expect(200)
             .end((err, res) => {
-              if (err) return done(err);
+           
               // テストで作成したデータを削除
+              //URLからscheduleID取得
               const scheduleId = createdSchedulePath.split('/schedules/')[1];
               Candidate.findAll({
                 where: { scheduleId: scheduleId }
