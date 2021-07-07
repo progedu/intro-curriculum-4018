@@ -61,23 +61,28 @@ describe('/schedules', () => {
         .expect('Location', /schedules/)
         .expect(302)
         .end((err, res) => {
-          let createdSchedulePath = res.headers.location;
+          let createdSchedulePath = res.headers.location;//レスポンスヘッダからスケジュールのURLを作成
           request(app)
-            .get(createdSchedulePath)
-            // TODO 作成された予定と候補が表示されていることをテストする
+            .get(createdSchedulePath) //作ったスケジュールのURLにアクセスして、予定が表示されるかテスト
+            .expect(/テスト予定1/)
+            .expect(/テストメモ1/)
+            .expect(/テストメモ2/)
+            .expect(/テスト候補1/)
+            .expect(/テスト候補2/)
+            .expect(/テスト候補3/)
             .expect(200)
             .end((err, res) => {
               if (err) return done(err);
               // テストで作成したデータを削除
-              const scheduleId = createdSchedulePath.split('/schedules/')[1];
+              const scheduleId = createdSchedulePath.split('/schedules/')[1]; //URLからscheduleIdを作成
               Candidate.findAll({
-                where: { scheduleId: scheduleId }
-              }).then((candidates) => {
-                const promises = candidates.map((c) => { return c.destroy(); });
-                Promise.all(promises).then(() => {
-                  Schedule.findByPk(scheduleId).then((s) => { 
-                    s.destroy().then(() => { 
-                      done(); 
+                where: { scheduleId: scheduleId } //scheduleIdに対応する候補日を検索
+              }).then((candidates) => { 
+                const promises = candidates.map((c) => { return c.destroy(); });// 検索結果の候補日を削除
+                Promise.all(promises).then(() => { //直前の削除処理が全部終わるまで待つ
+                  Schedule.findByPk(scheduleId).then((s) => { //スケジュールを探して削除
+                    s.destroy().then(() => {
+                      done();
                     });
                   });
                 });
