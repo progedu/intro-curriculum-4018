@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const authenticationEnsurer = require('./authentication-ensurer');
-const uuid = require('node-uuid');
+const uuid = require('uuid');
 const Schedule = require('../models/schedule');
 const Candidate = require('../models/candidate');
 const User = require('../models/user');
@@ -16,18 +16,20 @@ router.post('/', authenticationEnsurer, (req, res, next) => {
   const updatedAt = new Date();
   Schedule.create({
     scheduleId: scheduleId,
-    scheduleName: req.body.scheduleName.slice(0, 255),
+    scheduleName: req.body.scheduleName.slice(0, 255) || '（名称未設定）',
     memo: req.body.memo,
     createdBy: req.user.id,
     updatedAt: updatedAt
   }).then((schedule) => {
-    const candidateNames = req.body.candidates.trim().split('\n').map((s) => s.trim());
-    const candidates = candidateNames.map((c) => { return {
-      candidateName: c,
-      scheduleId: schedule.scheduleId
-    };});
+    const candidateNames = req.body.candidates.trim().split('\n').map((s) => s.trim()).filter((s) => s !== "");
+    const candidates = candidateNames.map((c) => {
+      return {
+        candidateName: c,
+        scheduleId: schedule.scheduleId
+      };
+    });
     Candidate.bulkCreate(candidates).then(() => {
-          res.redirect('/schedules/' + schedule.scheduleId);
+      res.redirect('/schedules/' + schedule.scheduleId);
     });
   });
 });
@@ -42,19 +44,19 @@ router.get('/:scheduleId', authenticationEnsurer, (req, res, next) => {
     where: {
       scheduleId: req.params.scheduleId
     },
-    order: '"updatedAt" DESC'
+    order: [['updatedAt', 'DESC']]
   }).then((schedule) => {
     if (schedule) {
       Candidate.findAll({
         where: { scheduleId: schedule.scheduleId },
-        order: '"candidateId" ASC'
+        order: [['candidateId', 'ASC']]
       }).then((candidates) => {
-         res.render('schedule', {
-              user: req.user,
-              schedule: schedule,
-              candidates: candidates,
-              users: [req.user]
-            });
+        res.render('schedule', {
+          user: req.user,
+          schedule: schedule,
+          candidates: candidates,
+          users: [req.user]
+        });
       });
     } else {
       const err = new Error('指定された予定は見つかりません');
@@ -63,4 +65,5 @@ router.get('/:scheduleId', authenticationEnsurer, (req, res, next) => {
     }
   });
 });
+
 module.exports = router;
